@@ -17,6 +17,11 @@ export class Flight {
     this.landingQuality = ""; this.message = "";
     this.prevZ = this.z; this.prevX = this.x;
     this.propAngle = 0; this.stallBeepTimer = 0;
+    // Takeoff grace: false until the plane has genuinely flown (climbed
+    // well clear of the ground) since the last reset. While false, runway
+    // plateau contact is pure rolling - pitch input on the ground roll can
+    // never damage the hull. Set in update(), cleared only here.
+    this.hasAirborne = false;
   }
   get altitude() { return Math.max(0, Math.round(this.y - groundHeightAt(this.x, this.z))); }
   get headingDeg() { return Math.round(((this.heading * 180 / Math.PI) % 360 + 360) % 360); }
@@ -69,6 +74,10 @@ export class Flight {
     this.x += Math.sin(this.heading) * this.speed * dt;
     this.z += -Math.cos(this.heading) * this.speed * dt;
     this.y += this.vspeed * dt;
+    // Genuine liftoff: only latch once the plane is well clear of the
+    // ground (8 m above it), far beyond any bounce height during the
+    // takeoff roll, so a pitch-held roll never trips this early.
+    if (!this.hasAirborne && this.y > groundHeightAt(this.x, this.z) + 8) this.hasAirborne = true;
     this.propAngle += dt * (4 + this.throttle * 40);
     // Fuel
     this.fuel = Math.max(0, this.fuel - dt * PHYS.fuelBurn * (0.25 + this.throttle));
@@ -113,6 +122,14 @@ export class Flight {
         this.score += (this.landingQuality === "PERFECT" ? SCORE.landingPerfect : SCORE.landingOk)
           + Math.round(this.fuel) * SCORE.fuelBonusPerUnit - Math.round(this.damage);
         if (audio) audio.thud();
+        return;
+      }
+      // Takeoff grace: until the plane has genuinely flown since reset,
+      // plateau contact is always pure rolling - no bounce damage and no
+      // ground-impact crash from this branch, whatever the pitch input.
+      if (!this.hasAirborne) {
+        this.vspeed = 0; // still on the takeoff roll
+        if (nearFinal && this.ringIndex < RINGS.length) this.message = "Land here only after all 8 rings!";
         return;
       }
       if (this.speed < PHYS.stallSpeed + 2 && this.vspeed <= 0.5) {
