@@ -9,14 +9,14 @@ export function applyShot(flight, name) {
   flight.throttle = 0.72; flight.speed = 34; flight.fuel = 78;
   if (name === "cover") {
     const r = RINGS[2];
-    flight.x = r.x - 30; flight.z = r.z + 210; flight.y = r.y + 6;
-    flight.heading = -0.12; flight.pitch = 0.04; flight.roll = -0.18;
+    flight.x = r.x - 42; flight.z = r.z + 292; flight.y = r.y + 6;
+    flight.heading = 0.143; flight.pitch = 0.04; flight.roll = -0.08;
     flight.ringIndex = 2; flight.ringsPassed = 2; flight.score = 300;
     flight.message = "";
   } else if (name === "rings") {
     const r = RINGS[4];
-    flight.x = r.x + 18; flight.z = r.z + 190; flight.y = r.y + 3;
-    flight.heading = 0.1; flight.pitch = 0.02; flight.roll = 0.22;
+    flight.x = r.x - 40; flight.z = r.z + 288; flight.y = r.y + 3;
+    flight.heading = 0.138; flight.pitch = 0.02; flight.roll = 0.06;
     flight.ringIndex = 4; flight.ringsPassed = 4; flight.score = 600; flight.fuel = 64;
   } else if (name === "final") {
     const rw = WORLD.finalRunway;
